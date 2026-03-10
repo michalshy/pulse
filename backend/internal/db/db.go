@@ -30,5 +30,5 @@ func Connect() error {
 	}
 
 	Pool = pool
-	return nil;
+	return nil
 }
