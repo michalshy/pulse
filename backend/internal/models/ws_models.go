@@ -16,8 +16,7 @@ type HandshakeMessage struct {
 }
 
 type TriggerMessage struct {
-	Type    string `json:"type"`
-	Trigger string `json:"trigger"`
+	Type string `json:"type"`
 }
 
 type FlushPayload struct {

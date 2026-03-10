@@ -13,3 +13,9 @@ func CreateSession(ctx context.Context, gameID string, metadata json.RawMessage)
 	).Scan(&id)
 	return id, err
 }
+
+func EndSession(ctx context.Context, sessionID int64) error {
+	_, err := Pool.Exec(ctx,
+		"UPDATE sessions SET ended_at = NOW() WHERE id = $1", sessionID)
+	return err
+}

@@ -33,17 +33,20 @@ func (h *Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
 	// first message must be handshake!
 	_, data, err := conn.ReadMessage()
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	var msg models.HandshakeMessage
 	if err := json.Unmarshal(data, &msg); err != nil {
+		log.Println(err)
 		return
 	}
 	sessionID, err := db.CreateSession(context.Background(), msg.GameID, msg.Metadata)
 	if err != nil {
+		log.Println(err)
 		return
 	}
-	h.Manager.RegisterClient(sessionID, conn)
+	h.Manager.RegisterSession(sessionID, conn)
 
 	for {
 		_, data, err := conn.ReadMessage()
@@ -61,10 +64,9 @@ func (h *Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
 		switch base.Type {
 		case "flush":
 			// handle flush
-		case "trigger":
-			// handle trigger
 		}
 	}
 
-	h.Manager.UnregisterClient(sessionID)
+	h.Manager.UnregisterSession(sessionID)
+	db.EndSession(context.Background(), sessionID)
 }

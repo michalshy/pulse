@@ -17,14 +17,14 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) RegisterClient(sessionID int64, conn *websocket.Conn) {
+func (m *Manager) RegisterSession(sessionID int64, conn *websocket.Conn) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	m.clients[sessionID] = conn
 }
 
-func (m *Manager) UnregisterClient(sessionID int64) {
+func (m *Manager) UnregisterSession(sessionID int64) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -32,5 +32,8 @@ func (m *Manager) UnregisterClient(sessionID int64) {
 }
 
 func (m *Manager) GetSession(sessionID int64) *websocket.Conn {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
 	return m.clients[sessionID]
 }

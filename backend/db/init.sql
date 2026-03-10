@@ -22,8 +22,7 @@ CREATE INDEX idx_sessions_game_id ON sessions (game_id);
 CREATE TABLE captures (
     id          BIGSERIAL       PRIMARY KEY,
     session_id  BIGINT          NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-    captured_at TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
-    trigger     TEXT            NOT NULL DEFAULT 'manual'  -- 'manual', 'interval', 'threshold', 'event'
+    captured_at TIMESTAMPTZ     NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_captures_session_id ON captures (session_id);
