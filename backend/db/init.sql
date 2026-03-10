@@ -72,21 +72,20 @@ CREATE TABLE metric_value_json (
 -- value_type  = which metric_value_* table to join
 -- value_id    = FK into that table
 
-CREATE TYPE metric_value_type AS ENUM ('float', 'int', 'vec2', 'vec3', 'json', 'string');
+CREATE TYPE metric_value_type AS ENUM ('float', 'int', 'vec2', 'vec3', 'string', 'json');
 
 CREATE TABLE metrics (
     id          BIGSERIAL           PRIMARY KEY,
-    capture_id  BIGINT              NOT NULL REFERENCES captures(id) ON DELETE CASCADE,
+    capture_id  BIGINT              REFERENCES captures(id) ON DELETE CASCADE,
     recorded_at TIMESTAMPTZ         NOT NULL,
-    name        TEXT                NOT NULL,               -- 'fps', 'memory_mb', 'player_pos', etc
+    name        TEXT                NOT NULL,
+    parent_id   BIGINT              REFERENCES metrics(id) ON DELETE CASCADE,
     value_type  metric_value_type   NOT NULL,
     value_id    BIGINT              NOT NULL
 );
 
-CREATE INDEX idx_metrics_capture_id  ON metrics (capture_id);
-CREATE INDEX idx_metrics_recorded_at ON metrics (recorded_at);
-CREATE INDEX idx_metrics_type        ON metrics (name);
-
+CREATE INDEX idx_metrics_capture_id ON metrics (capture_id);
+CREATE INDEX idx_metrics_parent_id  ON metrics (parent_id);
 
 -- ── EVENTS ───────────────────────────────────────────────────
 -- Discrete named occurrences inside a capture window
