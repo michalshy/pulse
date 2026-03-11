@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 )
 
-func CreateSession(ctx context.Context, gameID string, metadata json.RawMessage) (int64, error) {
+func CreateSession(ctx context.Context, projectID string, metadata json.RawMessage) (int64, error) {
 	var id int64
 	err := Pool.QueryRow(ctx,
-		"INSERT INTO sessions (game_id, metadata) VALUES ($1, $2) RETURNING id",
-		gameID, metadata,
+		"INSERT INTO sessions (project_id, metadata) VALUES ($1, $2) RETURNING id",
+		projectID, metadata,
 	).Scan(&id)
 	return id, err
 }

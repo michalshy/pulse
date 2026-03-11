@@ -10,9 +10,9 @@ type BaseMessage struct {
 }
 
 type HandshakeMessage struct {
-	Type     string          `json:"type"`
-	GameID   string          `json:"game_id"`
-	Metadata json.RawMessage `json:"metadata"`
+	Type      string          `json:"type"`
+	ProjectID string          `json:"project_id"`
+	Metadata  json.RawMessage `json:"metadata"`
 }
 
 type TriggerMessage struct {

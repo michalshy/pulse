@@ -9,7 +9,7 @@ import (
 
 type Session struct {
 	ID        int64
-	GameID    string
+	ProjectID string
 	StartedAt time.Time
 	EndedAt   *time.Time
 	Metadata  json.RawMessage
@@ -68,10 +68,9 @@ const (
 
 type Metric struct {
 	ID         int64
-	CaptureID  *int64
+	CaptureID  int64
 	RecordedAt time.Time
 	Name       string
-	ParentID   *int64
 	ValueType  MetricValueType
 	ValueID    int64
 }

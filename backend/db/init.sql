@@ -3,17 +3,17 @@
 -- ============================================================
 
 -- ── SESSIONS ─────────────────────────────────────────────────
--- Represents a single game run / playtesting session
+-- Represents a single project run / playtesting session
 
 CREATE TABLE sessions (
     id          BIGSERIAL       PRIMARY KEY,
-    game_id     TEXT            NOT NULL,
+    project_id     TEXT            NOT NULL,
     started_at  TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     ended_at    TIMESTAMPTZ,
     metadata    JSONB                                       -- engine version, platform, build, map etc
 );
 
-CREATE INDEX idx_sessions_game_id ON sessions (game_id);
+CREATE INDEX idx_sessions_project_id ON sessions (project_id);
 
 
 -- ── CAPTURES ─────────────────────────────────────────────────
@@ -78,13 +78,11 @@ CREATE TABLE metrics (
     capture_id  BIGINT              REFERENCES captures(id) ON DELETE CASCADE,
     recorded_at TIMESTAMPTZ         NOT NULL,
     name        TEXT                NOT NULL,
-    parent_id   BIGINT              REFERENCES metrics(id) ON DELETE CASCADE,
     value_type  metric_value_type   NOT NULL,
     value_id    BIGINT              NOT NULL
 );
 
 CREATE INDEX idx_metrics_capture_id ON metrics (capture_id);
-CREATE INDEX idx_metrics_parent_id  ON metrics (parent_id);
 
 -- ── EVENTS ───────────────────────────────────────────────────
 -- Discrete named occurrences inside a capture window

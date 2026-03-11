@@ -2,11 +2,11 @@ package db
 
 import "context"
 
-func CreateCapture(ctx context.Context, sessionID int64, trigger string) (int64, error) {
+func CreateCapture(ctx context.Context, sessionID int64) (int64, error) {
 	var id int64
 	err := Pool.QueryRow(ctx,
-		"INSERT INTO captures (session_id, trigger) VALUES ($1, $2) RETURNING id",
-		sessionID, trigger,
+		"INSERT INTO captures (session_id) VALUES ($1) RETURNING id",
+		sessionID,
 	).Scan(&id)
 	return id, err
 }
