@@ -29,42 +29,6 @@ CREATE INDEX idx_captures_session_id ON captures (session_id);
 CREATE INDEX idx_captures_captured_at ON captures (captured_at);
 
 
--- ── METRIC VALUE TABLES ───────────────────────────────────────
-
-CREATE TABLE metric_value_float (
-    id          BIGSERIAL       PRIMARY KEY,
-    value       FLOAT8          NOT NULL
-);
-
-CREATE TABLE metric_value_int (
-    id          BIGSERIAL       PRIMARY KEY,
-    value       INT8            NOT NULL
-);
-
-CREATE TABLE metric_value_vec2 (
-    id          BIGSERIAL       PRIMARY KEY,
-    x           FLOAT8          NOT NULL,
-    y           FLOAT8          NOT NULL
-);
-
-CREATE TABLE metric_value_vec3 (
-    id          BIGSERIAL       PRIMARY KEY,
-    x           FLOAT8          NOT NULL,
-    y           FLOAT8          NOT NULL,
-    z           FLOAT8          NOT NULL
-);
-
-CREATE TABLE metric_value_string (
-    id          BIGSERIAL       PRIMARY KEY,
-    value       TEXT            NOT NULL
-);
-
-CREATE TABLE metric_value_json (
-    id          BIGSERIAL       PRIMARY KEY,
-    value       JSONB           NOT NULL
-);
-
-
 -- ── METRICS ──────────────────────────────────────────────────
 -- One row per sampled data point inside a capture window
 -- recorded_at = when the SDK sampled this inside the ring buffer
@@ -79,7 +43,7 @@ CREATE TABLE metrics (
     recorded_at TIMESTAMPTZ         NOT NULL,
     name        TEXT                NOT NULL,
     value_type  metric_value_type   NOT NULL,
-    value_id    BIGINT              NOT NULL
+    value       JSONB               NOT NULL
 );
 
 CREATE INDEX idx_metrics_capture_id ON metrics (capture_id);

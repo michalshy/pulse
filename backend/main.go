@@ -29,21 +29,20 @@ func main() {
 	wsHandler := &ws.Handler{Manager: manager}
 	log.Println("Created WS Handler")
 
-	restHandler := &rest.Handler{}
+	restHandler := &rest.Handler{Manager: manager}
 
 	r := chi.NewRouter()
 	r.Get("/sessions/{game_id}", restHandler.GetSessions)
-	r.Get("/sessions/{game_id}/{session_id}", restHandler.GetSession)
-	r.Get("/sessions/{game_id}/{session_id}/captures", restHandler.GetCaptures)
-	r.Get("/sessions/{game_id}/{session_id}/metrics", restHandler.GetMetrics)
-	r.Get("/sessions/{game_id}/{session_id}/events", restHandler.GetEvents)
-	r.Post("/sessions/{game_id}/{session_id}/trigger", restHandler.PostCapture)
-
-	http.HandleFunc("/ws", wsHandler.HandleWS)
+	r.Get("/session/{session_id}", restHandler.GetSession)
+	r.Get("/captures/{session_id}", restHandler.GetCaptures)
+	r.Get("/metrics/{capture_id}", restHandler.GetMetrics)
+	r.Get("/events/{capture_id}", restHandler.GetEvents)
+	r.Post("/trigger/{session_id}", restHandler.TriggerCapture)
+	r.Get("/ws", wsHandler.HandleWS)
 
 	port := os.Getenv("SERVER_PORT")
 	log.Printf("Server starting on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatal(err)
 	}
 }

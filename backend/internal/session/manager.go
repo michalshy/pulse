@@ -1,6 +1,9 @@
 package session
 
 import (
+	"encoding/json"
+	"fmt"
+	"pulse/internal/models"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -36,4 +39,21 @@ func (m *Manager) GetSession(sessionID int64) *websocket.Conn {
 	defer m.mu.RUnlock()
 
 	return m.clients[sessionID]
+}
+
+func (m *Manager) SendTrigger(sessionID int64) error {
+	m.mu.RLock()
+	conn := m.clients[sessionID]
+	m.mu.RUnlock()
+
+	if conn == nil {
+		return fmt.Errorf("session %d not active", sessionID)
+	}
+
+	data, err := json.Marshal(models.TriggerMessage{Type: "trigger"})
+	if err != nil {
+		return err
+	}
+
+	return conn.WriteMessage(websocket.TextMessage, data)
 }

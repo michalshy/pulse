@@ -77,7 +77,7 @@ func (h *Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
 			}
 
 			for _, metric := range flush.Metrics {
-				if err := insertMetric(ctx, captureID, metric); err != nil {
+				if _, err := db.CreateMetric(ctx, captureID, metric.RecordedAt, metric.Name, metric.ValueType, metric.Value); err != nil {
 					log.Println(err)
 				}
 			}
@@ -92,52 +92,4 @@ func (h *Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 	h.Manager.UnregisterSession(sessionID)
 	db.EndSession(context.Background(), sessionID)
-}
-
-func insertMetric(ctx context.Context, captureID int64, metric models.MetricPayload) error {
-	var valueID int64
-	var err error
-	switch metric.ValueType {
-	case models.MetricValueTypeFloat:
-		var value float64
-		if err = json.Unmarshal(metric.Value, &value); err != nil {
-			return err
-		}
-		valueID, err = db.CreateMetricFloat(ctx, value)
-	case models.MetricValueTypeInt:
-		var value int64
-		if err = json.Unmarshal(metric.Value, &value); err != nil {
-			return err
-		}
-		valueID, err = db.CreateMetricInt(ctx, value)
-	case models.MetricValueTypeVec2:
-		var value [2]float64
-		if err = json.Unmarshal(metric.Value, &value); err != nil {
-			return err
-		}
-		valueID, err = db.CreateMetricVec2(ctx, value[0], value[1])
-	case models.MetricValueTypeVec3:
-		var value [3]float64
-		if err = json.Unmarshal(metric.Value, &value); err != nil {
-			return err
-		}
-		valueID, err = db.CreateMetricVec3(ctx, value[0], value[1], value[2])
-	case models.MetricValueTypeJSON:
-		valueID, err = db.CreateMetricJSON(ctx, metric.Value)
-	case models.MetricValueTypeString:
-		var value string
-		if err = json.Unmarshal(metric.Value, &value); err != nil {
-			return err
-		}
-		valueID, err = db.CreateMetricString(ctx, value)
-	}
-	if err != nil {
-		return err
-	}
-
-	if _, err := db.CreateMetric(ctx, captureID, metric.RecordedAt, metric.Name, metric.ValueType, valueID); err != nil {
-		return err
-	}
-
-	return nil
 }

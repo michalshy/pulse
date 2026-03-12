@@ -8,51 +8,17 @@ import (
 // DATABASE MODELS
 
 type Session struct {
-	ID        int64
-	ProjectID string
-	StartedAt time.Time
-	EndedAt   *time.Time
-	Metadata  json.RawMessage
+	ID        int64           `json:"id"`
+	ProjectID string          `json:"project_id"`
+	StartedAt time.Time       `json:"started_at"`
+	EndedAt   *time.Time      `json:"ended_at"`
+	Metadata  json.RawMessage `json:"metadata"`
 }
 
 type Capture struct {
 	ID         int64
 	SessionID  int64
 	CapturedAt time.Time
-	Trigger    string
-}
-
-type MetricValueFloat struct {
-	ID    int64
-	Value float64
-}
-
-type MetricValueInt struct {
-	ID    int64
-	Value int64
-}
-
-type MetricValueVec2 struct {
-	ID int64
-	X  float64
-	Y  float64
-}
-
-type MetricValueVec3 struct {
-	ID int64
-	X  float64
-	Y  float64
-	Z  float64
-}
-
-type MetricValueJSON struct {
-	ID    int64
-	Value json.RawMessage
-}
-
-type MetricValueText struct {
-	ID    int64
-	Value string
 }
 
 type MetricValueType string
@@ -67,18 +33,18 @@ const (
 )
 
 type Metric struct {
-	ID         int64
-	CaptureID  int64
-	RecordedAt time.Time
-	Name       string
-	ValueType  MetricValueType
-	ValueID    int64
+	ID         int64           `json:"id"`
+	CaptureID  int64           `json:"capture_id"`
+	RecordedAt time.Time       `json:"recorded_at"`
+	Name       string          `json:"name"`
+	ValueType  MetricValueType `json:"value_type"`
+	Value      json.RawMessage `json:"value"`
 }
 
 type Event struct {
-	ID         int64
-	CaptureID  int64
-	RecordedAt time.Time
-	Name       string
-	Metadata   json.RawMessage
+	ID         int64           `json:"id"`
+	CaptureID  int64           `json:"capture_id"`
+	RecordedAt time.Time       `json:"recorded_at"`
+	Name       string          `json:"name"`
+	Metadata   json.RawMessage `json:"metadata"`
 }
