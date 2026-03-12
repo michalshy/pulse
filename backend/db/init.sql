@@ -10,7 +10,7 @@ CREATE TABLE sessions (
     project_id     TEXT            NOT NULL,
     started_at  TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     ended_at    TIMESTAMPTZ,
-    metadata    JSONB                                       -- engine version, platform, build, map etc
+    metadata    JSONB           DEFAULT '{}'        -- engine version, platform, build, map etc
 );
 
 CREATE INDEX idx_sessions_project_id ON sessions (project_id);
@@ -57,7 +57,7 @@ CREATE TABLE events (
     capture_id  BIGINT          NOT NULL REFERENCES captures(id) ON DELETE CASCADE,
     recorded_at TIMESTAMPTZ     NOT NULL,
     name        TEXT            NOT NULL,
-    metadata    JSONB                                       -- optional payload, e.g. { "ability": "dash", "damage": 42 }
+    metadata    JSONB           DEFAULT '{}'  -- optional payload, e.g. { "ability": "dash", "damage": 42 }
 );
 
 CREATE INDEX idx_events_capture_id  ON events (capture_id);

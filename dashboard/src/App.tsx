@@ -1,35 +1,30 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react"
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+interface Session {
+  id: number
+  project_id: string
+  started_at: string
+  ended_at: string | null
 }
 
-export default App
+export default function App() {
+  const [sessions, setSessions] = useState<Session[]>([])
+
+  useEffect(() => {
+    fetch("http://localhost:8080/sessions/test_game")
+      .then(res => res.json())
+      .then(data => setSessions(data))
+  }, [])
+
+  return (
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-4">Sessions</h1>
+      {sessions.map(session => (
+        <div key={session.id} className="border p-4 mb-2">
+          <p>{session.project_id}</p>
+          <p>{session.started_at}</p>
+        </div>
+      ))}
+    </div>
+  )
+}

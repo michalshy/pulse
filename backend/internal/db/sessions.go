@@ -28,7 +28,7 @@ func GetSessions(ctx context.Context, projectID string) ([]models.Session, error
 	}
 	defer rows.Close()
 
-	var sessions []models.Session
+	sessions := make([]models.Session, 0)
 	for rows.Next() {
 		var s models.Session
 		if err := rows.Scan(&s.ID, &s.ProjectID, &s.StartedAt, &s.EndedAt, &s.Metadata); err != nil {

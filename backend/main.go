@@ -10,6 +10,7 @@ import (
 	"pulse/internal/ws"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -32,7 +33,14 @@ func main() {
 	restHandler := &rest.Handler{Manager: manager}
 
 	r := chi.NewRouter()
-	r.Get("/sessions/{game_id}", restHandler.GetSessions)
+
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"http://localhost:5173", "http://127.0.0.1:5173"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"Content-Type"},
+	}))
+
+	r.Get("/sessions/{project_id}", restHandler.GetSessions)
 	r.Get("/session/{session_id}", restHandler.GetSession)
 	r.Get("/captures/{session_id}", restHandler.GetCaptures)
 	r.Get("/metrics/{capture_id}", restHandler.GetMetrics)
