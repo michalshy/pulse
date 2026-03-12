@@ -25,6 +25,17 @@ type FlushPayload struct {
 	Events  []EventPayload  `json:"events"`
 }
 
+type MetricValueType string
+
+const (
+	MetricValueTypeFloat  MetricValueType = "float"
+	MetricValueTypeInt    MetricValueType = "int"
+	MetricValueTypeVec2   MetricValueType = "vec2"
+	MetricValueTypeVec3   MetricValueType = "vec3"
+	MetricValueTypeString MetricValueType = "string"
+	MetricValueTypeJSON   MetricValueType = "json"
+)
+
 type MetricPayload struct {
 	Name       string          `json:"name"`
 	RecordedAt time.Time       `json:"recorded_at"`
