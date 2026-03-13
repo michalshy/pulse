@@ -1,11 +1,12 @@
+import { Activity } from "lucide-react"
 
-function NavBar({ isConnected }: { isConnected: boolean }) {
-    return (
-        <nav>
-            <span>PULSE</span>
-            <span style={{ color: isConnected ? '#00ff94' : #FF4444}}>
-                {isConnected ? 'CONNECTED' : 'DISCONNECTED'}
-            </span>
-        </nav>
-    )
+export default function TopBar() {
+  return (
+    <nav className="flex items-center justify-between px-6 py-4 bg-[#0D1117] border-b border-[#21262D]">
+      <div className="flex items-center gap-2">
+        <Activity className="text-[#10B981]" size={20} />
+        <span className="text-white font-semibold text-lg">Pulse</span>
+      </div>
+    </nav>
+  )
 }
