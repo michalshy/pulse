@@ -6,11 +6,11 @@ import (
 	"pulse/internal/models"
 )
 
-func CreateSession(ctx context.Context, projectID string, metadata json.RawMessage) (int64, error) {
+func CreateSession(ctx context.Context, projectKey string, metadata json.RawMessage) (int64, error) {
 	var id int64
 	err := Pool.QueryRow(ctx,
-		"INSERT INTO sessions (project_id, metadata) VALUES ($1, $2) RETURNING id",
-		projectID, metadata,
+		"INSERT INTO sessions (project_key, metadata) VALUES ($1, $2) RETURNING id",
+		projectKey, metadata,
 	).Scan(&id)
 	return id, err
 }
@@ -21,8 +21,8 @@ func EndSession(ctx context.Context, sessionID int64) error {
 	return err
 }
 
-func GetSessions(ctx context.Context, projectID string) ([]models.Session, error) {
-	rows, err := Pool.Query(ctx, "SELECT id, project_id, started_at, ended_at, metadata FROM sessions WHERE project_id = $1", projectID)
+func GetSessions(ctx context.Context, projectKey string) ([]models.Session, error) {
+	rows, err := Pool.Query(ctx, "SELECT id, project_key, started_at, ended_at, metadata FROM sessions WHERE project_key = $1", projectKey)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func GetSessions(ctx context.Context, projectID string) ([]models.Session, error
 	sessions := make([]models.Session, 0)
 	for rows.Next() {
 		var s models.Session
-		if err := rows.Scan(&s.ID, &s.ProjectID, &s.StartedAt, &s.EndedAt, &s.Metadata); err != nil {
+		if err := rows.Scan(&s.ID, &s.ProjectKey, &s.StartedAt, &s.EndedAt, &s.Metadata); err != nil {
 			return nil, err
 		}
 		sessions = append(sessions, s)
@@ -43,9 +43,9 @@ func GetSessions(ctx context.Context, projectID string) ([]models.Session, error
 func GetSession(ctx context.Context, sessionID int64) (*models.Session, error) {
 	var s models.Session
 	err := Pool.QueryRow(ctx,
-		"SELECT id, project_id, started_at, ended_at, metadata FROM sessions WHERE id = $1",
+		"SELECT id, project_key, started_at, ended_at, metadata FROM sessions WHERE id = $1",
 		sessionID,
-	).Scan(&s.ID, &s.ProjectID, &s.StartedAt, &s.EndedAt, &s.Metadata)
+	).Scan(&s.ID, &s.ProjectKey, &s.StartedAt, &s.EndedAt, &s.Metadata)
 	if err != nil {
 		return nil, err
 	}

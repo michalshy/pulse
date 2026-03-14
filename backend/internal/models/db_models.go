@@ -7,12 +7,21 @@ import (
 
 // DATABASE MODELS
 
+type Project struct {
+	ID          int64           `json:"id"`
+	Key         string          `json:"key"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	CreatedAt   time.Time       `json:"created_at"`
+	Metadata    json.RawMessage `json:"metadata"`
+}
+
 type Session struct {
-	ID        int64           `json:"id"`
-	ProjectID string          `json:"project_id"`
-	StartedAt time.Time       `json:"started_at"`
-	EndedAt   *time.Time      `json:"ended_at"`
-	Metadata  json.RawMessage `json:"metadata"`
+	ID         int64           `json:"id"`
+	ProjectKey string          `json:"project_key"`
+	StartedAt  time.Time       `json:"started_at"`
+	EndedAt    *time.Time      `json:"ended_at"`
+	Metadata   json.RawMessage `json:"metadata"`
 }
 
 type Capture struct {

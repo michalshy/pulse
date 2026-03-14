@@ -41,7 +41,13 @@ func (h *Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	sessionID, err := db.CreateSession(context.Background(), msg.ProjectID, msg.Metadata)
+
+	if err := db.CheckProject(r.Context(), msg.ProjectKey); err != nil {
+		log.Println(err)
+		return
+	}
+
+	sessionID, err := db.CreateSession(context.Background(), msg.ProjectKey, msg.Metadata)
 	if err != nil {
 		log.Println(err)
 		return

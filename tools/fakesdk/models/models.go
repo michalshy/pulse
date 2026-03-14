@@ -5,26 +5,6 @@ import (
 	"time"
 )
 
-type BaseMessage struct {
-	Type string `json:"type"`
-}
-
-type HandshakeMessage struct {
-	Type      string          `json:"type"`
-	ProjectID string          `json:"project_id"`
-	Metadata  json.RawMessage `json:"metadata"`
-}
-
-type TriggerMessage struct {
-	Type string `json:"type"`
-}
-
-type FlushPayload struct {
-	Type    string          `json:"type"`
-	Metrics []MetricPayload `json:"metrics"`
-	Events  []EventPayload  `json:"events"`
-}
-
 type MetricValueType string
 
 const (
@@ -35,6 +15,22 @@ const (
 	MetricValueTypeString MetricValueType = "string"
 	MetricValueTypeJSON   MetricValueType = "json"
 )
+
+type BaseMessage struct {
+	Type string `json:"type"`
+}
+
+type HandshakeMessage struct {
+	Type       string          `json:"type"`
+	ProjectKey string          `json:"project_key"`
+	Metadata   json.RawMessage `json:"metadata"`
+}
+
+type FlushPayload struct {
+	Type    string          `json:"type"`
+	Metrics []MetricPayload `json:"metrics"`
+	Events  []EventPayload  `json:"events"`
+}
 
 type MetricPayload struct {
 	Name       string          `json:"name"`

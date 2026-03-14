@@ -50,7 +50,7 @@ func (m *Manager) SendTrigger(sessionID int64) error {
 		return fmt.Errorf("session %d not active", sessionID)
 	}
 
-	data, err := json.Marshal(models.TriggerMessage{Type: "trigger"})
+	data, err := json.Marshal(models.TriggerRequest{Type: "trigger"})
 	if err != nil {
 		return err
 	}

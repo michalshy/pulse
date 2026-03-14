@@ -2,19 +2,28 @@
 -- Pulse Database Schema
 -- ============================================================
 
+CREATE TABLE projects (
+    id              BIGSERIAL   PRIMARY KEY,
+    key             TEXT        NOT NULL UNIQUE,
+    name            TEXT        NOT NULL,
+    description     TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    metadata        JSONB       DEFAULT '{}'
+);
+CREATE INDEX idx_projects_created_at ON projects (created_at);
+
 -- ── SESSIONS ─────────────────────────────────────────────────
 -- Represents a single project run / playtesting session
 
 CREATE TABLE sessions (
     id          BIGSERIAL       PRIMARY KEY,
-    project_id     TEXT            NOT NULL,
+    project_key TEXT            NOT NULL REFERENCES projects(key) ON DELETE CASCADE,
     started_at  TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     ended_at    TIMESTAMPTZ,
     metadata    JSONB           DEFAULT '{}'        -- engine version, platform, build, map etc
 );
 
-CREATE INDEX idx_sessions_project_id ON sessions (project_id);
-
+CREATE INDEX idx_sessions_project_key ON sessions (project_key);
 
 -- ── CAPTURES ─────────────────────────────────────────────────
 -- Represents a single flush triggered by dashboard or SDK rule

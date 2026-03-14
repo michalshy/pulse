@@ -40,7 +40,9 @@ func main() {
 		AllowedHeaders: []string{"Content-Type"},
 	}))
 
-	r.Get("/sessions/{project_id}", restHandler.GetSessions)
+	r.Get("/projects", restHandler.GetProjects)
+	r.Post("/projects", restHandler.CreateProject)
+	r.Get("/sessions/{project_key}", restHandler.GetSessions)
 	r.Get("/session/{session_id}", restHandler.GetSession)
 	r.Get("/captures/{session_id}", restHandler.GetCaptures)
 	r.Get("/metrics/{capture_id}", restHandler.GetMetrics)

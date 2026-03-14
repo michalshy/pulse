@@ -10,13 +10,9 @@ type BaseMessage struct {
 }
 
 type HandshakeMessage struct {
-	Type      string          `json:"type"`
-	ProjectID string          `json:"project_id"`
-	Metadata  json.RawMessage `json:"metadata"`
-}
-
-type TriggerMessage struct {
-	Type string `json:"type"`
+	Type       string          `json:"type"`
+	ProjectKey string          `json:"project_key"`
+	Metadata   json.RawMessage `json:"metadata"`
 }
 
 type FlushPayload struct {
