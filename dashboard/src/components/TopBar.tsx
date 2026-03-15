@@ -1,7 +1,7 @@
 import { Activity, Plus } from "lucide-react"
 import { Button } from "./ui/button"
 import { useState } from "react"
-import NewProjectForm from './NewProjectForm'
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -9,9 +9,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import type { ProjectFormData } from "@/models/project"
+import { api } from "@/lib/api"
 
 export default function TopBar() {
   const [isOpen, setIsOpen] = useState(false)
+
+  const onSubmit = async (formData: FormData) => {
+    const data: ProjectFormData = {
+        key: formData.get("key") as string,
+        name: formData.get("name") as string,
+        description: formData.get("description") as string,
+    }
+
+    const res = await api.post("/projects", data)
+
+    if (res) {
+      setIsOpen(false)
+      toast.success("Project created successfully!")
+    } else {
+      toast.error("Failed to create project.")
+    }
+  }
 
   return (
     <nav className="bg-[#161B22] border-b border-[#21262D]">
@@ -24,14 +43,45 @@ export default function TopBar() {
           <Plus size={16}/>
           New project
         </Button>
-        
         { /* Dialog */ }
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent>
+          <DialogContent className='bg-[]'>
             <DialogHeader>
-              <DialogTitle>Add new Project:</DialogTitle>
+              <DialogTitle className='text-lg'>Add new Project:</DialogTitle>
             </DialogHeader>
-            <NewProjectForm/>
+            <DialogDescription className='text-base'>
+              Share your innovative thoughts.
+            </DialogDescription>
+            <form action={onSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                  <label htmlFor="key" className="text-sm">Project key</label>
+                  <input 
+                      id="key" 
+                      name="key" 
+                      placeholder="ExG" 
+                      className="outline-none rounded-md border px-3 py-2 text-sm" 
+                  />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                  <label htmlFor="name" className="text-sm">Project name</label>
+                  <input 
+                      id="name" 
+                      name="name" 
+                      placeholder="Example Game" 
+                      className="outline-none rounded-md border px-3 py-2 text-sm" 
+                  />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                  <label htmlFor="description" className="text-sm">Project description</label>
+                  <textarea 
+                      id="description" 
+                      name="description" 
+                      placeholder="What's this project about?" 
+                      className="outline-none rounded-md border px-3 py-2 text-sm" 
+                  />
+              </div>
+              <Button type="submit">Add</Button>
+            </form>        
           </DialogContent>
         </Dialog>
       </div>

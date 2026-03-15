@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"pulse/internal/db"
 	"pulse/internal/models"
@@ -39,6 +40,7 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.CreateProject(r.Context(), req.Name, req.Key, req.Description)
 	if err != nil {
+		log.Println("CreateProject error:", err)
 		http.Error(w, "Failed to create project", http.StatusInternalServerError)
 		return
 	}

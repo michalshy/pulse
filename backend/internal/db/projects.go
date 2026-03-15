@@ -6,7 +6,7 @@ import (
 )
 
 func GetProjects(ctx context.Context) ([]models.Project, error) {
-	rows, err := Pool.Query(ctx, "SELECT id, name, description, created_at, metadata FROM projects")
+	rows, err := Pool.Query(ctx, "SELECT id, name, key, description, created_at, metadata FROM projects")
 	if err != nil {
 		return nil, err
 	}
