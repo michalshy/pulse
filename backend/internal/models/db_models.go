@@ -14,6 +14,7 @@ type Project struct {
 	Description string          `json:"description"`
 	CreatedAt   time.Time       `json:"created_at"`
 	Metadata    json.RawMessage `json:"metadata"`
+	Active      bool            `json:"active"`
 }
 
 type Session struct {

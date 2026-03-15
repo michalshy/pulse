@@ -12,7 +12,7 @@ import {
 import type { ProjectFormData } from "@/models/project"
 import { api } from "@/lib/api"
 
-export default function TopBar() {
+export default function NewProjectButton({ onProjectCreated }: { onProjectCreated: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
 
   const onSubmit = async (formData: FormData) => {
@@ -27,6 +27,7 @@ export default function TopBar() {
     if (res) {
       setIsOpen(false)
       toast.success("Project created successfully!")
+      onProjectCreated()
     } else {
       toast.error("Failed to create project.")
     }

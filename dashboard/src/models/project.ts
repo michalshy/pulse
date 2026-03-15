@@ -11,4 +11,5 @@ export type Project = {
     description: string
     created_at: string
     metadata: string
+    active: boolean
 }

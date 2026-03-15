@@ -12,6 +12,9 @@ export default function ProjectCard({ project }: {project: Project}) {
             <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs">{project.key}</span>
             </div>
+            <span className={`text-xs ${project.active ? "text-[#10B981]" : "text-[#484F58]"}}`}>
+                ● {project.active ? "ACTIVE" : "INACTIVE"}
+            </span>
             <h3 className="font-medium">{project.name}</h3>
             <p className="text-sm mt-1 line-clamp-2">{project.description}</p>
         </div>

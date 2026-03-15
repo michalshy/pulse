@@ -6,7 +6,11 @@ import (
 )
 
 func GetProjects(ctx context.Context) ([]models.Project, error) {
-	rows, err := Pool.Query(ctx, "SELECT id, name, key, description, created_at, metadata FROM projects")
+	rows, err := Pool.Query(ctx, `
+		SELECT id, key, name, description, created_at, metadata,
+			EXISTS(SELECT 1 FROM sessions s WHERE s.project_key = p.key AND s.ended_at IS NULL) AS active
+		FROM projects p
+	`)
 	if err != nil {
 		return nil, err
 	}
@@ -15,7 +19,7 @@ func GetProjects(ctx context.Context) ([]models.Project, error) {
 	projects := make([]models.Project, 0)
 	for rows.Next() {
 		var p models.Project
-		if err := rows.Scan(&p.ID, &p.Key, &p.Name, &p.Description, &p.CreatedAt, &p.Metadata); err != nil {
+		if err := rows.Scan(&p.ID, &p.Key, &p.Name, &p.Description, &p.CreatedAt, &p.Metadata, &p.Active); err != nil {
 			return nil, err
 		}
 		projects = append(projects, p)

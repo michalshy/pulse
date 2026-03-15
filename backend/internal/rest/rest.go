@@ -38,7 +38,7 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := db.CreateProject(r.Context(), req.Name, req.Key, req.Description)
+	id, err := db.CreateProject(r.Context(), req.Key, req.Name, req.Description)
 	if err != nil {
 		log.Println("CreateProject error:", err)
 		http.Error(w, "Failed to create project", http.StatusInternalServerError)

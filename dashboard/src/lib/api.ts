@@ -7,6 +7,7 @@ export const api = {
                 console.error("API error:", res.status)
                 return null
             }
+            console.log(res)
             return res.json()
         }),
     post: (path: string, body: unknown) => 
