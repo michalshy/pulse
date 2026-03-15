@@ -23,7 +23,7 @@ func main() {
 	// write message
 	var Message models.HandshakeMessage
 	Message.Type = "handshake"
-	Message.ProjectKey = "test_game"
+	Message.ProjectKey = "ExGame"
 
 	data, err := json.Marshal(Message)
 	if err != nil {
