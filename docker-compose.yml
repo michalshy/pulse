@@ -1,43 +1,49 @@
 services:
-  postgres:
-    image: postgres:16
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  # the application instance being observed
+  backend-app:
+    build: ./backend
     ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - "8080:8080"
+    volumes:
+      - app-data:/data
+      - app-logs:/var/log/backend
+    environment:
+      - DUCKDB_PATH=/data/observability.db
+      - LOG_PATH=/var/log/backend/app.log
+      - PORT=8080
 
-  # backend:
-  #   build: ./backend
-  #   restart: unless-stopped
-  #   env_file: .env
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+  # the observability instance (dogfooding)
+  backend-obs:
+    build: ./backend
+    ports:
+      - "8081:8080"
+    volumes:
+      - obs-data:/data
+    environment:
+      - DUCKDB_PATH=/data/observability.db
+      - PORT=8080
 
-  # dashboard:
-  #   build: ./dashboard
-  #   restart: unless-stopped
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - backend
-  #   volumes:
-  #     - ./dashboard:/app
-  #     - /app/node_modules
+  # agent watches the app instance, ships to the obs instance
+  agent:
+    build: ./agent
+    volumes:
+      - app-logs:/var/log/watched:ro
+    environment:
+      - WATCH_FILES=/var/log/watched/app.log
+      - BACKEND_URL=http://backend-obs:8080
+      - AGENT_ID=dogfood-agent-1
+    depends_on:
+      - backend-app
+      - backend-obs
+
+  dashboard:
+    build: ./dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8081
 
 volumes:
-  postgres_data:
+  app-data:
+  obs-data:
+  app-logs:

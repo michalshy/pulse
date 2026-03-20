@@ -1,12 +1,21 @@
-FROM golang:1.23-alpine
+FROM golang:1.22-bookworm
+
+# DuckDB C library (needed by go-duckdb driver)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY go.mod ./
+# Data directory for DuckDB
+RUN mkdir -p /data
+
+COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+RUN go build -o /usr/local/bin/backend ./cmd/backend
 
-RUN go build -o main .
+EXPOSE 8080
 
-CMD ["./main"]
+CMD ["backend"]
