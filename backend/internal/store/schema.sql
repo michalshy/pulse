@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS projects (
     id         INTEGER PRIMARY KEY DEFAULT nextval('projects_id_seq'),
     key         VARCHAR NOT NULL,
     name        VARCHAR NOT NULL,
+    description TEXT NOT NULL,
     api_key     VARCHAR NOT NULL UNIQUE,
     created_at  TIMESTAMP DEFAULT current_timestamp,
     retention_days INTEGER DEFAULT 30

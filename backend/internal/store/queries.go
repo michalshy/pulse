@@ -6,6 +6,37 @@ import (
 	"time"
 )
 
+func (s *Store) QueryProjects(ctx context.Context) ([]models.Project, error) {
+	rows, err := s.db.QueryContext(ctx, "SELECT id, key, name, description, api_key, created_at, retention_days FROM projects")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	projects := make([]models.Project, 0)
+	for rows.Next() {
+		var p models.Project
+		if err := rows.Scan(&p.ID, &p.Key, &p.Name, &p.Description, &p.APIKey, &p.CreatedAt, &p.RetentionDays); err != nil {
+			return nil, err
+		}
+		projects = append(projects, p)
+	}
+
+	return projects, rows.Err()
+}
+
+func (s *Store) InsertProject(ctx context.Context, key string, name string, description string, apiKey string, retentionDays int64) (int64, error) {
+	var id int64
+	err := s.db.QueryRowContext(ctx,
+		"INSERT INTO projects (key, name, description, api_key, retention_days) VALUES (?,?,?,?,?) RETURNING id",
+		key, name, description, apiKey, retentionDays,
+	).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func (s *Store) QueryLogs(projectID int64, from, to time.Time, level string) ([]models.Log, error) {
 	return nil, nil
 }
@@ -26,8 +57,18 @@ func (s *Store) CreateAlertRule() {
 
 }
 
-func (s *Store) GetProjectByAPIKey(ctx context.Context, apiKey string) (models.Project, error) {
-	return models.Project{}, nil
+func (s *Store) GetProjectByAPIKey(ctx context.Context, apiKey string) (*models.Project, error) {
+	var project models.Project
+
+	err := s.db.QueryRowContext(ctx,
+		"SELECT id, key, name, description, api_key, created_at, retention_days FROM projects WHERE api_key = ?", apiKey,
+	).Scan(&project.ID, &project.Key, &project.Name, &project.Description, &project.APIKey, &project.CreatedAt, &project.RetentionDays)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &project, nil
 }
 
 func (s *Store) InsertLogs(ctx context.Context, projectID int64, logs []models.IngestLog) error {

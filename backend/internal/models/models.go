@@ -9,6 +9,7 @@ type Project struct {
 	ID            int64     `json:"id"`
 	Key           string    `json:"key"`
 	Name          string    `json:"name"`
+	Description   string    `json:"description"`
 	APIKey        string    `json:"api_key"`
 	CreatedAt     time.Time `json:"created_at"`
 	RetentionDays int64     `json:"retention_days"`
@@ -92,4 +93,12 @@ type IngestMetric struct {
 type IngestBatch struct {
 	Logs    []IngestLog    `json:"logs"`
 	Metrics []IngestMetric `json:"metrics"`
+}
+
+type CreateProjectRequest struct {
+	Key           string `json:"key"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	ApiKey        string `json:"api_key"`
+	RetentionDays int64  `json:"retention_days"`
 }
