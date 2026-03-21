@@ -12,6 +12,7 @@ type Project struct {
 	Description   string    `json:"description"`
 	CreatedAt     time.Time `json:"created_at"`
 	RetentionDays int64     `json:"retention_days"`
+	LastHeartbeat time.Time `json:"last_heartbeat"`
 }
 
 type Log struct {

@@ -37,6 +37,8 @@ func main() {
 	log.Println("Setup cors")
 
 	r.Post("/ingest", h.HandleBatch)
+	r.Post("/project", h.CreateProject)
+	r.Get("/projects", h.GetProjects)
 	log.Println("Registered handlers")
 
 	port := os.Getenv("SERVER_PORT")

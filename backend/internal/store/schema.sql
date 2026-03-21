@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS projects (
     name        VARCHAR NOT NULL,
     description TEXT NOT NULL,
     created_at  TIMESTAMP DEFAULT current_timestamp,
-    retention_days INTEGER DEFAULT 30
+    retention_days INTEGER DEFAULT 30,
+    last_heartbeat TIMESTAMP DEFAULT current_timestamp
 );
 
 -- ------------------------------------------------------------

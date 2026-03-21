@@ -2,6 +2,7 @@ export type ProjectFormData = {
     key: string
     name: string
     description: string
+    retention_days: number
 }
 
 export type Project = {
@@ -9,7 +10,5 @@ export type Project = {
     key: string
     name: string
     description: string
-    created_at: string
-    metadata: string
     active: boolean
 }

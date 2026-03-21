@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Store) QueryProjects(ctx context.Context) ([]models.Project, error) {
-	rows, err := s.db.QueryContext(ctx, "SELECT id, key, name, description, created_at, retention_days FROM projects")
+	rows, err := s.db.QueryContext(ctx, "SELECT id, key, name, description, created_at, retention_days, last_heartbeat FROM projects")
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (s *Store) QueryProjects(ctx context.Context) ([]models.Project, error) {
 	projects := make([]models.Project, 0)
 	for rows.Next() {
 		var p models.Project
-		if err := rows.Scan(&p.ID, &p.Key, &p.Name, &p.Description, &p.CreatedAt, &p.RetentionDays); err != nil {
+		if err := rows.Scan(&p.ID, &p.Key, &p.Name, &p.Description, &p.CreatedAt, &p.RetentionDays, &p.LastHeartbeat); err != nil {
 			return nil, err
 		}
 		projects = append(projects, p)
