@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Store) QueryProjects(ctx context.Context) ([]models.Project, error) {
-	rows, err := s.db.QueryContext(ctx, "SELECT id, key, name, description, api_key, created_at, retention_days FROM projects")
+	rows, err := s.db.QueryContext(ctx, "SELECT id, key, name, description, created_at, retention_days FROM projects")
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (s *Store) QueryProjects(ctx context.Context) ([]models.Project, error) {
 	projects := make([]models.Project, 0)
 	for rows.Next() {
 		var p models.Project
-		if err := rows.Scan(&p.ID, &p.Key, &p.Name, &p.Description, &p.APIKey, &p.CreatedAt, &p.RetentionDays); err != nil {
+		if err := rows.Scan(&p.ID, &p.Key, &p.Name, &p.Description, &p.CreatedAt, &p.RetentionDays); err != nil {
 			return nil, err
 		}
 		projects = append(projects, p)
@@ -25,11 +25,11 @@ func (s *Store) QueryProjects(ctx context.Context) ([]models.Project, error) {
 	return projects, rows.Err()
 }
 
-func (s *Store) InsertProject(ctx context.Context, key string, name string, description string, apiKey string, retentionDays int64) (int64, error) {
+func (s *Store) InsertProject(ctx context.Context, key string, name string, description string, retentionDays int64) (int64, error) {
 	var id int64
 	err := s.db.QueryRowContext(ctx,
-		"INSERT INTO projects (key, name, description, api_key, retention_days) VALUES (?,?,?,?,?) RETURNING id",
-		key, name, description, apiKey, retentionDays,
+		"INSERT INTO projects (key, name, description, retention_days) VALUES (?,?,?,?) RETURNING id",
+		key, name, description, retentionDays,
 	).Scan(&id)
 	if err != nil {
 		return 0, err
@@ -57,21 +57,7 @@ func (s *Store) CreateAlertRule() {
 
 }
 
-func (s *Store) GetProjectByAPIKey(ctx context.Context, apiKey string) (*models.Project, error) {
-	var project models.Project
-
-	err := s.db.QueryRowContext(ctx,
-		"SELECT id, key, name, description, api_key, created_at, retention_days FROM projects WHERE api_key = ?", apiKey,
-	).Scan(&project.ID, &project.Key, &project.Name, &project.Description, &project.APIKey, &project.CreatedAt, &project.RetentionDays)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &project, nil
-}
-
-func (s *Store) InsertLogs(ctx context.Context, projectID int64, logs []models.IngestLog) error {
+func (s *Store) InsertLogs(ctx context.Context, projectKey string, logs []models.IngestLog) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -83,7 +69,7 @@ func (s *Store) InsertLogs(ctx context.Context, projectID int64, logs []models.I
 			`INSERT INTO logs 
 			(project_id, timestamp, level, message, agent_id, host, source_file, attrs) 
 			VALUES (?,?,?,?,?,?,?,?)`,
-			projectID,
+			projectKey,
 			logs[i].Timestamp,
 			logs[i].Level,
 			logs[i].Message,
@@ -100,7 +86,7 @@ func (s *Store) InsertLogs(ctx context.Context, projectID int64, logs []models.I
 	return tx.Commit()
 }
 
-func (s *Store) InsertMetrics(ctx context.Context, projectID int64, metrics []models.IngestMetric) error {
+func (s *Store) InsertMetrics(ctx context.Context, projectKey string, metrics []models.IngestMetric) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -112,7 +98,7 @@ func (s *Store) InsertMetrics(ctx context.Context, projectID int64, metrics []mo
 			`INSERT INTO metrics 
 			(project_id, timestamp, name, value, metric_type, agent_id, host, tags) 
 			VALUES (?,?,?,?,?,?,?,?)`,
-			projectID,
+			projectKey,
 			metrics[i].Timestamp,
 			metrics[i].Name,
 			metrics[i].Value,

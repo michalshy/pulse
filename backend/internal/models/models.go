@@ -10,14 +10,13 @@ type Project struct {
 	Key           string    `json:"key"`
 	Name          string    `json:"name"`
 	Description   string    `json:"description"`
-	APIKey        string    `json:"api_key"`
 	CreatedAt     time.Time `json:"created_at"`
 	RetentionDays int64     `json:"retention_days"`
 }
 
 type Log struct {
 	ID         int64            `json:"id"`
-	ProjectID  string           `json:"project_id"`
+	ProjectKey string           `json:"project_key"`
 	Timestamp  time.Time        `json:"timestamp"`
 	Level      string           `json:"level"`
 	Message    string           `json:"message"`
@@ -30,7 +29,7 @@ type Log struct {
 
 type Metric struct {
 	ID         int64            `json:"id"`
-	ProjectID  string           `json:"project_id"`
+	ProjectKey string           `json:"project_key"`
 	Timestamp  time.Time        `json:"timestamp"`
 	Name       string           `json:"name"`
 	Value      float64          `json:"value"`
@@ -43,7 +42,7 @@ type Metric struct {
 
 type AlertRule struct {
 	ID              int64            `json:"id"`
-	ProjectID       string           `json:"project_id"`
+	ProjectKey      string           `json:"project_key"`
 	Name            string           `json:"name"`
 	Description     *string          `json:"description"`
 	QueryType       string           `json:"query_type"`
@@ -62,7 +61,7 @@ type AlertRule struct {
 type AlertEvent struct {
 	ID         int64      `json:"id"`
 	RuleID     int64      `json:"rule_id"`
-	ProjectID  int64      `json:"project_id"`
+	ProjectKey string     `json:"project_key"`
 	FiredAt    time.Time  `json:"fired_at"`
 	ResolvedAt *time.Time `json:"resolved_at"`
 	Value      float64    `json:"value"`
@@ -99,6 +98,5 @@ type CreateProjectRequest struct {
 	Key           string `json:"key"`
 	Name          string `json:"name"`
 	Description   string `json:"description"`
-	ApiKey        string `json:"api_key"`
 	RetentionDays int64  `json:"retention_days"`
 }

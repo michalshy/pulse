@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS projects (
     key         VARCHAR NOT NULL,
     name        VARCHAR NOT NULL,
     description TEXT NOT NULL,
-    api_key     VARCHAR NOT NULL UNIQUE,
     created_at  TIMESTAMP DEFAULT current_timestamp,
     retention_days INTEGER DEFAULT 30
 );
@@ -28,7 +27,7 @@ CREATE TABLE IF NOT EXISTS projects (
 CREATE SEQUENCE IF NOT EXISTS logs_id_seq START 1;
 CREATE TABLE IF NOT EXISTS logs (
     id INTEGER PRIMARY KEY DEFAULT nextval('logs_id_seq'),
-    project_id  INTEGER NOT NULL,
+    project_key  VARCHAR NOT NULL,
     timestamp   TIMESTAMP NOT NULL,
     level       VARCHAR NOT NULL,              -- debug, info, warn, error, fatal
     message     TEXT NOT NULL,
@@ -54,7 +53,7 @@ CREATE INDEX IF NOT EXISTS idx_logs_level
 CREATE SEQUENCE IF NOT EXISTS metrics_id_seq START 1;
 CREATE TABLE IF NOT EXISTS metrics (
     id          INTEGER PRIMARY KEY DEFAULT nextval('metrics_id_seq'),
-    project_id  INTEGER NOT NULL,
+    project_key  VARCHAR NOT NULL,
     timestamp   TIMESTAMP NOT NULL,
     name        VARCHAR NOT NULL,     -- e.g. http_request_duration_seconds
     value       DOUBLE NOT NULL,
@@ -76,7 +75,7 @@ CREATE INDEX IF NOT EXISTS idx_metrics_project_name_time
 CREATE SEQUENCE IF NOT EXISTS alert_rules_id_seq START 1;
 CREATE TABLE IF NOT EXISTS alert_rules (
     id          INTEGER PRIMARY KEY DEFAULT nextval('alert_rules_id_seq'),
-    project_id  INTEGER NOT NULL,
+    project_key  VARCHAR NOT NULL,
     name        VARCHAR NOT NULL,
     description TEXT,
     -- what to check
@@ -107,7 +106,7 @@ CREATE SEQUENCE IF NOT EXISTS alert_events_id_seq START 1;
 CREATE TABLE IF NOT EXISTS alert_events (
     id          INTEGER PRIMARY KEY DEFAULT nextval('alert_events_id_seq'),
     rule_id     INTEGER NOT NULL,
-    project_id  INTEGER NOT NULL,
+    project_key  VARCHAR NOT NULL,
     fired_at    TIMESTAMP NOT NULL,
     resolved_at TIMESTAMP,
     value       DOUBLE,               -- the value that triggered it

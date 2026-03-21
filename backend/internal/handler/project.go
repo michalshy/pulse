@@ -28,7 +28,7 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.store.InsertProject(r.Context(), req.Name, req.Key, req.Description, req.ApiKey, req.RetentionDays)
+	id, err := h.store.InsertProject(r.Context(), req.Name, req.Key, req.Description, req.RetentionDays)
 	if err != nil {
 		http.Error(w, "Failed to create project", http.StatusInternalServerError)
 		return
