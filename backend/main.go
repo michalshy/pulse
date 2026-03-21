@@ -10,15 +10,17 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+
+	_ "github.com/marcboeker/go-duckdb"
 )
 
 func main() {
 	if err := godotenv.Load("../.env"); err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	store, err := store.New("data/observability.go")
+	store, err := store.New("data/observability.db")
 	if err != nil {
-		log.Fatal("Error connecting to database")
+		log.Fatal("Error connecting to database: ", err)
 	}
 	log.Println("Connected to database")
 

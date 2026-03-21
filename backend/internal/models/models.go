@@ -5,11 +5,6 @@ import (
 	"time"
 )
 
-type IngestBatch struct {
-	Logs    []Log    `json:"logs"`
-	Metrics []Metric `json:"metrics"`
-}
-
 type Project struct {
 	ID            int64     `json:"id"`
 	Key           string    `json:"key"`
@@ -72,4 +67,29 @@ type AlertEvent struct {
 	Value      float64    `json:"value"`
 	State      string     `json:"state"`
 	Notified   bool       `json:"notified"`
+}
+
+type IngestLog struct {
+	Timestamp  time.Time        `json:"timestamp"`
+	Level      string           `json:"level"`
+	Message    string           `json:"message"`
+	AgentID    *string          `json:"agent_id,omitempty"`
+	Host       *string          `json:"host,omitempty"`
+	SourceFile *string          `json:"source_file,omitempty"`
+	Attrs      *json.RawMessage `json:"attrs,omitempty"`
+}
+
+type IngestMetric struct {
+	Timestamp  time.Time        `json:"timestamp"`
+	Name       string           `json:"name"`
+	Value      float64          `json:"value"`
+	MetricType *string          `json:"metric_type,omitempty"`
+	AgentID    *string          `json:"agent_id,omitempty"`
+	Host       *string          `json:"host,omitempty"`
+	Tags       *json.RawMessage `json:"tags,omitempty"`
+}
+
+type IngestBatch struct {
+	Logs    []IngestLog    `json:"logs"`
+	Metrics []IngestMetric `json:"metrics"`
 }

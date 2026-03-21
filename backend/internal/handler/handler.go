@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
+	"pulse/internal/models"
 	"pulse/internal/store"
 )
 
@@ -16,5 +18,33 @@ func New(store *store.Store) *Handler {
 }
 
 func (h *Handler) HandleBatch(w http.ResponseWriter, r *http.Request) {
+	apiKey := r.Header.Get("Authorization")
+	if apiKey == "" {
+		http.Error(w, "Missing api key", http.StatusUnauthorized)
+	}
+	project, err := h.store.GetProjectByAPIKey(r.Context(), apiKey)
+	if err != nil {
+		http.Error(w, "invalid api key", http.StatusUnauthorized)
+		return
+	}
 
+	// authorized
+	var batch models.IngestBatch
+	if err := json.NewDecoder(r.Body).Decode(&batch); err != nil {
+		http.Error(w, "Invalid body request", http.StatusBadRequest)
+	}
+
+	// batch exists
+	if len(batch.Logs) > 0 {
+		if err := h.store.InsertLogs(r.Context(), project.ID, batch.Logs); err != nil {
+			http.Error(w, "Failed to insert logs", http.StatusInternalServerError)
+		}
+	}
+	if len(batch.Metrics) > 0 {
+		if err := h.store.InsertMetrics(r.Context(), project.ID, batch.Metrics); err != nil {
+			http.Error(w, "Failed to insert metrics", http.StatusInternalServerError)
+		}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
