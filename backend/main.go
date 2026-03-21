@@ -4,10 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"pulse/internal/db"
-	"pulse/internal/rest"
-	"pulse/internal/session"
-	"pulse/internal/ws"
+	"pulse/internal/handler"
+	"pulse/internal/store"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -18,37 +16,23 @@ func main() {
 	if err := godotenv.Load("../.env"); err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
-	if err := db.Connect(); err != nil {
-		log.Fatal(err)
+	store, err := store.New("data/observability.go")
+	if err != nil {
+		log.Fatal("Error connecting to database")
 	}
 	log.Println("Connected to database")
 
-	manager := session.NewManager()
-	log.Println("Created manager")
-
-	wsHandler := &ws.Handler{Manager: manager}
-	log.Println("Created WS Handler")
-
-	restHandler := &rest.Handler{Manager: manager}
+	handler := handler.New(store)
 
 	r := chi.NewRouter()
+	log.Println("Created router")
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"http://localhost:5173", "http://127.0.0.1:5173"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders: []string{"Content-Type"},
 	}))
-
-	r.Get("/projects", restHandler.GetProjects)
-	r.Post("/projects", restHandler.CreateProject)
-	r.Get("/sessions/{project_key}", restHandler.GetSessions)
-	r.Get("/session/{session_id}", restHandler.GetSession)
-	r.Get("/captures/{session_id}", restHandler.GetCaptures)
-	r.Get("/metrics/{capture_id}", restHandler.GetMetrics)
-	r.Get("/events/{capture_id}", restHandler.GetEvents)
-	r.Post("/trigger/{session_id}", restHandler.TriggerCapture)
-	r.Get("/ws", wsHandler.HandleWS)
+	log.Println("Setup cors")
 
 	port := os.Getenv("SERVER_PORT")
 	log.Printf("Server starting on port %s", port)
