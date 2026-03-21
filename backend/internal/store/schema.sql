@@ -5,9 +5,8 @@
 
 -- ------------------------------------------------------------
 -- Projects
--- Every other table references project_id.
--- api_key is what the agent sends in the Authorization header;
--- the backend maps it to a project_id on ingest.
+-- Every other table references key.
+-- key is what the agent sends in the Authorization header;
 -- ------------------------------------------------------------
 CREATE SEQUENCE IF NOT EXISTS projects_id_seq START 1;
 CREATE TABLE IF NOT EXISTS projects (
@@ -40,10 +39,10 @@ CREATE TABLE IF NOT EXISTS logs (
 
 -- Primary query pattern: filter by project + time range + level
 CREATE INDEX IF NOT EXISTS idx_logs_project_time
-    ON logs (project_id, timestamp DESC);
+    ON logs (project_key, timestamp DESC);
 
 CREATE INDEX IF NOT EXISTS idx_logs_level
-    ON logs (project_id, level, timestamp DESC);
+    ON logs (project_key, level, timestamp DESC);
 
 -- ------------------------------------------------------------
 -- Metrics
@@ -65,7 +64,7 @@ CREATE TABLE IF NOT EXISTS metrics (
 );
 
 CREATE INDEX IF NOT EXISTS idx_metrics_project_name_time
-    ON metrics (project_id, name, timestamp DESC);
+    ON metrics (project_key, name, timestamp DESC);
 
 -- ------------------------------------------------------------
 -- Alert rules
@@ -95,7 +94,7 @@ CREATE TABLE IF NOT EXISTS alert_rules (
 );
 
 CREATE INDEX IF NOT EXISTS idx_alert_rules_project
-    ON alert_rules (project_id, enabled);
+    ON alert_rules (project_key, enabled);
 
 -- ------------------------------------------------------------
 -- Alert events
