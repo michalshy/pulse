@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"context"
+	"net/http"
 	"pulse/internal/store"
 )
 
@@ -15,4 +15,6 @@ func New(store *store.Store) *Handler {
 	}
 }
 
-func GetProject(ctx context.Context)
+func (h *Handler) HandleBatch(w http.ResponseWriter, r *http.Request) {
+
+}

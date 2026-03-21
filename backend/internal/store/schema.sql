@@ -9,8 +9,10 @@
 -- api_key is what the agent sends in the Authorization header;
 -- the backend maps it to a project_id on ingest.
 -- ------------------------------------------------------------
+CREATE SEQUENCE IF NOT EXISTS projects_id_seq START 1;
 CREATE TABLE IF NOT EXISTS projects (
-    key         VARCHAR PRIMARY KEY,
+    id         INTEGER PRIMARY KEY DEFAULT nextval('projects_id_seq'),
+    key         VARCHAR NOT NULL,
     name        VARCHAR NOT NULL,
     api_key     VARCHAR NOT NULL UNIQUE,
     created_at  TIMESTAMP DEFAULT current_timestamp,
@@ -25,10 +27,10 @@ CREATE TABLE IF NOT EXISTS projects (
 CREATE SEQUENCE IF NOT EXISTS logs_id_seq START 1;
 CREATE TABLE IF NOT EXISTS logs (
     id INTEGER PRIMARY KEY DEFAULT nextval('logs_id_seq'),
-    project_id  VARCHAR NOT NULL,
+    project_id  INTEGER NOT NULL,
     timestamp   TIMESTAMP NOT NULL,
-    level       VARCHAR,              -- debug, info, warn, error, fatal
-    message     TEXT,
+    level       VARCHAR NOT NULL,              -- debug, info, warn, error, fatal
+    message     TEXT NOT NULL,
     agent_id    VARCHAR,
     host        VARCHAR,
     source_file VARCHAR,              -- which log file this came from
@@ -51,7 +53,7 @@ CREATE INDEX IF NOT EXISTS idx_logs_level
 CREATE SEQUENCE IF NOT EXISTS metrics_id_seq START 1;
 CREATE TABLE IF NOT EXISTS metrics (
     id          INTEGER PRIMARY KEY DEFAULT nextval('metrics_id_seq'),
-    project_id  VARCHAR NOT NULL,
+    project_id  INTEGER NOT NULL,
     timestamp   TIMESTAMP NOT NULL,
     name        VARCHAR NOT NULL,     -- e.g. http_request_duration_seconds
     value       DOUBLE NOT NULL,
@@ -72,8 +74,8 @@ CREATE INDEX IF NOT EXISTS idx_metrics_project_name_time
 -- ------------------------------------------------------------
 CREATE SEQUENCE IF NOT EXISTS alert_rules_id_seq START 1;
 CREATE TABLE IF NOT EXISTS alert_rules (
-    id          INTEGER PRIMARY KEY DEFAULT next_val('alert_rules_id_seq'),
-    project_id  VARCHAR NOT NULL,
+    id          INTEGER PRIMARY KEY DEFAULT nextval('alert_rules_id_seq'),
+    project_id  INTEGER NOT NULL,
     name        VARCHAR NOT NULL,
     description TEXT,
     -- what to check
@@ -102,9 +104,9 @@ CREATE INDEX IF NOT EXISTS idx_alert_rules_project
 -- ------------------------------------------------------------
 CREATE SEQUENCE IF NOT EXISTS alert_events_id_seq START 1;
 CREATE TABLE IF NOT EXISTS alert_events (
-    id          INTEGER PRIMARY KEY DEFAULT next_val('alert_events_id_seq'),
+    id          INTEGER PRIMARY KEY DEFAULT nextval('alert_events_id_seq'),
     rule_id     INTEGER NOT NULL,
-    project_id  VARCHAR NOT NULL,
+    project_id  INTEGER NOT NULL,
     fired_at    TIMESTAMP NOT NULL,
     resolved_at TIMESTAMP,
     value       DOUBLE,               -- the value that triggered it

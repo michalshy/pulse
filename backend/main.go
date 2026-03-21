@@ -22,7 +22,7 @@ func main() {
 	}
 	log.Println("Connected to database")
 
-	handler := handler.New(store)
+	h := handler.New(store)
 
 	r := chi.NewRouter()
 	log.Println("Created router")
@@ -33,6 +33,9 @@ func main() {
 		AllowedHeaders: []string{"Content-Type"},
 	}))
 	log.Println("Setup cors")
+
+	r.Post("/ingest", h.HandleBatch)
+	log.Println("Registered handlers")
 
 	port := os.Getenv("SERVER_PORT")
 	log.Printf("Server starting on port %s", port)
