@@ -1,20 +1,12 @@
 import ProjectButton from '@/components/projects/ProjectButton'
 import ProjectGrid from '@/components/projects/ProjectGrid'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import type { Project } from '@/models/project'
 import { api } from '@/lib/api'
+import { useProjects } from '@/context/ProjectsContext'
 
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>([])
-
-  const fetchProjects = () => {
-    api.get('/projects')
-      .then((data: Project[]) => setProjects(data))
-  }
-
-  useEffect(() => {
-    fetchProjects()
-  }, [])
+  const { projects, fetchProjects } = useProjects()
 
   return (
     <div className="w-full bg-[#0D1117] min-h-screen">

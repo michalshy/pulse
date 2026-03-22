@@ -5,7 +5,7 @@ export default function ProjectCard({ project }: {project: Project}) {
     const navigate = useNavigate()
 
     return (
-        <div onClick={() => {navigate(`project/${project.id}`)}} className="group max-w-sm bg-[#0d1117] border border-[#1e2733] rounded-xl p-6
+        <div onClick={() => navigate(`/project/${project.key}/logs`)} className="group max-w-sm bg-[#0d1117] border border-[#1e2733] rounded-xl p-6
             transition-all duration-300 cursor-pointer hover:border-emerald-500/60
             hover:-translate-y-0.5">
             { /* Header */ }

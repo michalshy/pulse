@@ -10,5 +10,7 @@ export type Project = {
     key: string
     name: string
     description: string
-    active: boolean
+    created_at: string
+    retention_days: number
+    last_heartbeat: string | null
 }
