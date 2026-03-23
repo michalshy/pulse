@@ -1,10 +1,11 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"pulse/internal/handler"
+	"pulse/internal/logg"
 	"pulse/internal/store"
 
 	"github.com/go-chi/chi"
@@ -16,34 +17,39 @@ import (
 
 func main() {
 	if err := godotenv.Load("../.env"); err != nil {
-		log.Fatal("Error loading .env file")
+		panic(err)
 	}
+	logPath := os.Getenv("LOG_FILE")
+	logger := logg.Logger{}
+	err := logger.ConfigureLogger(logPath)
+	defer logger.CloseLogger()
+
 	store, err := store.New("data/observability.db")
 	if err != nil {
-		log.Fatal("Error connecting to database: ", err)
+		slog.Error("Error connecting to database: ", err)
 	}
-	log.Println("Connected to database")
+	slog.Info("Connected to database")
 
 	h := handler.New(store)
 
 	r := chi.NewRouter()
-	log.Println("Created router")
+	slog.Info("Created router")
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"http://localhost:5173", "http://127.0.0.1:5173"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders: []string{"Content-Type"},
 	}))
-	log.Println("Setup cors")
+	slog.Info("Setup cors")
 
 	r.Post("/ingest", h.HandleBatch)
 	r.Post("/project", h.CreateProject)
 	r.Get("/projects", h.GetProjects)
-	log.Println("Registered handlers")
+	slog.Info("Registered handlers")
 
 	port := os.Getenv("SERVER_PORT")
-	log.Printf("Server starting on port %s", port)
+	slog.Info("Server starting on port %s", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
-		log.Fatal(err)
+		slog.Error(err.Error())
 	}
 }
