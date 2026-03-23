@@ -1,4 +1,4 @@
-package logg
+package plog
 
 import (
 	"io"
@@ -20,7 +20,7 @@ func (l *Logger) ConfigureLogger(path string) error {
 	var err error
 	l.file, err = os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	multi := io.MultiWriter(os.Stdout, l.file)

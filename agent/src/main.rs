@@ -1,81 +1,63 @@
 use tokio::sync::mpsc;
-use tokio::time::{sleep, Duration};
+use tokio::time::{interval, sleep, Duration};
+use reqwest::Client;
+use tokio_util::sync::CancellationToken;
 
-#[derive(Debug, Clone)]
-struct FrameSample {
-    frame_time: f64,
-    gpu_time: f64,
-    cpu_time: f64,
-    timestamp_ms: u64,
-}
-
-async fn ipc_reader(tx: mpsc::Sender<FrameSample>) {
-    let mut frame_number = 0u64;
-
-    loop {
-        sleep(Duration::from_millis(16)).await;
-
-        let frame = FrameSample {
-            frame_time: 16.6 + (frame_number % 10) as f64 * 0.3,
-            gpu_time: 12.0,
-            cpu_time: 8.0,
-            timestamp_ms: frame_number * 16,
-        };
-
-        if tx.send(frame).await.is_err() {
-            println!("receiver dropped");
-            break;
-        }
-
-        frame_number += 1;
-    }
-}
-
-async fn batch_sender(mut rx: mpsc::Receiver<FrameSample>) {
-    let mut batch: Vec<FrameSample> = Vec::new();
-    let batch_interval = Duration::from_millis(200);
+async fn heartbeat_task (
+    client: reqwest::Client,
+    base_url: String,
+    project_key: String,
+    interval_secs: u64,
+    token: CancellationToken,
+) {
+    let mut ticker = interval(Duration::from_secs(interval_secs));
 
     loop {
-        let deadline = tokio::time::sleep(batch_interval);
-        tokio::pin!(deadline);
-
-        loop {
-            tokio::select! {
-                _ = &mut deadline => {
-                    break;
-                }
-
-                frame = rx.recv() => {
-                    match frame {
-                        Some(f) => batch.push(f),
-                        None => {
-                            println!("channel closed");
-                            return;
-                        }
-                    }
+        tokio::select! {
+            _ = token.cancelled() => {
+                break;
+            }
+            _ = ticker.tick() => {
+                if let Err(e) = client
+                    .post(format!("{}/heartbeat/{}", base_url, project_key))
+                    .send()
+                    .await
+                {
+                    eprintln!("Heartbeat failed: {e}");
                 }
             }
         }
-
-        if !batch.is_empty() {
-            println!("sending batch of {} frames", batch.len());
-            // here grpc send
-            batch.clear();
-        }
     }
 }
 
+
 #[tokio::main]
 async fn main() {
-    let (tx, rx) = mpsc::channel::<FrameSample>(256);
+    dotenvy::from_path(".env").expect("Failed to load .env"); // Currently hardcoded - local settings
 
-    let reader = tokio::spawn(ipc_reader(tx));
-    let sender = tokio::spawn(batch_sender(rx));
+    let token = CancellationToken::new();
+    let client = reqwest::Client::new();
 
-    sleep(Duration::from_secs(3)).await;
+    let api_url = std::env::var("API").expect("API not set");
+    let project_key = std::env::var("PROJECT_KEY").expect("PROJECT_KEY not set");
 
-    reader.abort();
-    sender.abort();
+    let heartbeat_time: u64 = std::env::var("HEARTBEAT_TIME")
+        .expect("HEARTBEAT_TIME time not set")
+        .parse()
+        .expect("HEARTBEAT_TIME must be a number");
+
+    let heartbeat = tokio::spawn(heartbeat_task(
+        client.clone(), 
+        api_url, 
+        project_key, 
+        heartbeat_time, 
+        token.clone()
+    ));
+
+    tokio::signal::ctrl_c().await.expect("Failed to listen for ctrl+c");
+    token.cancel();
+
+    heartbeat.await.expect("Heartbeat task panicked!");
 
     println!("agent stopped!");
 }

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"pulse/internal/handler"
-	"pulse/internal/logg"
+	"pulse/internal/plog"
 	"pulse/internal/store"
 
 	"github.com/go-chi/chi"
@@ -20,8 +20,11 @@ func main() {
 		panic(err)
 	}
 	logPath := os.Getenv("LOG_FILE")
-	logger := logg.Logger{}
+	logger := plog.Logger{}
 	err := logger.ConfigureLogger(logPath)
+	if err != nil {
+		slog.Error("Couldn't create logger")
+	}
 	defer logger.CloseLogger()
 
 	store, err := store.New("data/observability.db")
@@ -45,10 +48,11 @@ func main() {
 	r.Post("/ingest", h.HandleBatch)
 	r.Post("/project", h.CreateProject)
 	r.Get("/projects", h.GetProjects)
+	r.Post("/heartbeat/{project_key}", h.KeepAlive)
 	slog.Info("Registered handlers")
 
 	port := os.Getenv("SERVER_PORT")
-	slog.Info("Server starting on port %s", port)
+	slog.Info("Server starting", "port", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
 		slog.Error(err.Error())
 	}

@@ -5,7 +5,7 @@ export default function ProjectCard({ project }: {project: Project}) {
     const navigate = useNavigate()
 
     const isActive = project.last_heartbeat
-        ? Date.now() - new Date(project.last_heartbeat).getTime() < 120000
+        ? Date.now() - new Date(project.last_heartbeat).getTime() < 60000
         : false
 
     return (

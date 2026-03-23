@@ -2,9 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"pulse/internal/models"
 	"pulse/internal/store"
+
+	"github.com/go-chi/chi"
 )
 
 type Handler struct {
@@ -12,13 +15,15 @@ type Handler struct {
 }
 
 func New(store *store.Store) *Handler {
+	slog.Info("Creating new handler")
 	return &Handler{
 		store: store,
 	}
 }
 
 func (h *Handler) HandleBatch(w http.ResponseWriter, r *http.Request) {
-	projectKey := r.Header.Get("Authorization")
+	projectKey := chi.URLParam(r, "project_key")
+	slog.Info("Got new batch message for {}", projectKey)
 	if projectKey == "" {
 		http.Error(w, "Missing project key", http.StatusUnauthorized)
 	}

@@ -55,7 +55,7 @@ export default function ProjectButton({ onProjectCreated }: { onProjectCreated: 
                   <input 
                       id="key" 
                       name="key" 
-                      placeholder="ExG" 
+                      placeholder="ExPr" 
                       className="outline-none rounded-md border px-3 py-2 text-sm" 
                   />
               </div>
@@ -64,7 +64,7 @@ export default function ProjectButton({ onProjectCreated }: { onProjectCreated: 
                   <input 
                       id="name" 
                       name="name" 
-                      placeholder="Example Game" 
+                      placeholder="Example Project" 
                       className="outline-none rounded-md border px-3 py-2 text-sm" 
                   />
               </div>
