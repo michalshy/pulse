@@ -19,6 +19,15 @@ CREATE TABLE IF NOT EXISTS projects (
     last_heartbeat TIMESTAMP DEFAULT current_timestamp
 );
 
+CREATE SEQUENCE IF NOT EXISTS project_heartbeats_id_seq START 1;           
+CREATE TABLE IF NOT EXISTS project_heartbeats (                            
+    id INTEGER PRIMARY KEY DEFAULT nextval('project_heartbeats_id_seq'),   
+    project_key VARCHAR NOT NULL,
+    timestamp TIMESTAMP DEFAULT current_timestamp,
+);
+CREATE INDEX IF NOT EXISTS idx_heartbeats_project_time
+    ON project_heartbeats (project_key, timestamp DESC);
+
 -- ------------------------------------------------------------
 -- Logs
 -- One row per log line. attrs holds arbitrary key/value JSON

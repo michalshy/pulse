@@ -1,31 +1,27 @@
 package main
 
 import (
+	"flag"
 	"log/slog"
 	"net/http"
 	"os"
+	"pulse/internal/config"
 	"pulse/internal/handler"
-	"pulse/internal/plog"
 	"pulse/internal/store"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
-	"github.com/joho/godotenv"
 
 	_ "github.com/marcboeker/go-duckdb"
 )
 
 func main() {
-	if err := godotenv.Load("../.env"); err != nil {
+	configPath := flag.String("config", "pulse.toml", "path to config file")
+	flag.Parse()
+	config, err := config.ParseConfig(*configPath)
+	if err != nil {
 		panic(err)
 	}
-	logPath := os.Getenv("LOG_FILE")
-	logger := plog.Logger{}
-	err := logger.ConfigureLogger(logPath)
-	if err != nil {
-		slog.Error("Couldn't create logger")
-	}
-	defer logger.CloseLogger()
 
 	store, err := store.New("data/observability.db")
 	if err != nil {
@@ -52,7 +48,7 @@ func main() {
 	slog.Info("Registered handlers")
 
 	port := os.Getenv("SERVER_PORT")
-	slog.Info("Server starting", "port", port)
+	slog.Info("Server starting", "port", config.Backend.Port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
 		slog.Error(err.Error())
 	}
