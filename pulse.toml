@@ -9,7 +9,7 @@ name = "Pulse Backend"
 
 [agent]
 host = "127.0.0.1"
-port = "9090"
+port = 9090
 binary = "../agent/target/release/pulse-agent"
 auto_start = true
 buffer_size = 4096 # bytes

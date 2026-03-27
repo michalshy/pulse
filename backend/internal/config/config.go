@@ -13,7 +13,7 @@ type PulseProject struct {
 
 type PulseAgent struct {
 	Host                  string
-	Port                  string
+	Port                  int64
 	Binary                string
 	AutoStart             bool
 	BufferSize            int
