@@ -70,7 +70,7 @@ func New(config config.PulseAgent) (*Agent, error) {
 	}, nil
 }
 
-func (agent *Agent) Heartbeat() error {
+func (agent *Agent) heartbeat() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -81,6 +81,23 @@ func (agent *Agent) Heartbeat() error {
 		return err
 	}
 
-	slog.Info("heartbeat response:", "status", "timestamp", resp.Ok, resp.Timestamp)
+	slog.Info("heartbeat response:", "status", resp.Ok, "timestamp", resp.Timestamp)
 	return nil
+}
+
+func (agent *Agent) StartHeartbeat(ctx context.Context, interval uint) {
+	ticker := time.NewTicker(time.Duration(interval))
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			if err := agent.heartbeat(); err != nil {
+				slog.Error("Heartbeat failed", "error", err)
+			}
+		case <-ctx.Done():
+			slog.Info("Heartbeat stopped")
+			return
+		}
+	}
 }

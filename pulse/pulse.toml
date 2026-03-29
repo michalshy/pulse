@@ -15,7 +15,7 @@ auto_start = true
 buffer_size = 4096 # bytes
 flush_interval_secs = 10
 flush_threshold = 0.8
-heartbeat_interval_secs = 30
+heartbeat_interval_secs = 5
 
 [ingest]
 endpoint = "http://localhost:8080/ingest"
@@ -23,4 +23,5 @@ timeout_secs = 5
 retry_attempts = 3
 
 [backend]
+host = "127.0.0.1"
 port = 8080

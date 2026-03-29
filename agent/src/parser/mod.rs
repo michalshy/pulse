@@ -29,6 +29,7 @@ pub struct IngestConfig {
 
 #[derive(Deserialize, Debug)]
 pub struct BackendConfig {
+    pub host: String,
     pub port: u64
 }
 

@@ -16,10 +16,10 @@ type PulseAgent struct {
 	Port                  int64
 	Binary                string
 	AutoStart             bool
-	BufferSize            int
-	FlushIntervalSecs     int
+	BufferSize            uint
+	FlushIntervalSecs     uint
 	FlushThreshold        float64
-	HeartbeatIntervalSecs int
+	HeartbeatIntervalSecs uint
 }
 
 type PulseIngest struct {
@@ -29,6 +29,7 @@ type PulseIngest struct {
 }
 
 type BackendConfig struct {
+	Host string
 	Port int
 }
 
