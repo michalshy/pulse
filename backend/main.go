@@ -49,9 +49,16 @@ func main() {
 	slog.Info("Registered handlers")
 
 	// Create and connect to PULSE Agent
-	agent := agent.New(config.Agent.Binary)
-	if agent != nil {
-		agent.ConnectToAgent()
+	agent, err := agent.New(config.Agent)
+	if err != nil {
+		slog.Error("Failed to connect to agent", "error", err)
+	} else {
+		slog.Info("Connected to agent, sending test heartbeat...")
+		if err := agent.Heartbeat(); err != nil {
+			slog.Error("Heartbeat failed", "error", err)
+		} else {
+			slog.Info("Hearbeat success, agent is alive")
+		}
 	}
 
 	// Listen on the port
