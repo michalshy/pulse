@@ -7,30 +7,30 @@ import (
 )
 
 type PulseProject struct {
-	Key  string
-	Name string
+	Key  string `toml:"key"`
+	Name string `toml:"name"`
 }
 
 type PulseAgent struct {
-	Host                  string
-	Port                  int64
-	Binary                string
-	AutoStart             bool
-	BufferSize            uint
-	FlushIntervalSecs     uint
-	FlushThreshold        float64
-	HeartbeatIntervalSecs uint
+	Host                  string  `toml:"host"`
+	Port                  int64   `toml:"port"`
+	Binary                string  `toml:"binary"`
+	AutoStart             bool    `toml:"auto_start"`
+	BufferSize            int     `toml:"buffer_size"`
+	FlushIntervalSecs     int     `toml:"flush_interval_secs"`
+	FlushThreshold        float64 `toml:"flush_threshold"`
+	HeartbeatIntervalSecs int     `toml:"heartbeat_interval_secs"`
 }
 
 type PulseIngest struct {
-	Endpoint      string
-	TimeoutSecs   int
-	RetryAttempts int
+	Endpoint      string `toml:"endpoint"`
+	TimeoutSecs   int    `toml:"timeout_secs"`
+	RetryAttempts int    `toml:"retry_attempts"`
 }
 
 type BackendConfig struct {
-	Host string
-	Port int
+	Host string `toml:"host"`
+	Port int    `toml:"port"`
 }
 
 type AppConfig struct {

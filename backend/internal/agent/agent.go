@@ -85,8 +85,8 @@ func (agent *Agent) heartbeat() error {
 	return nil
 }
 
-func (agent *Agent) StartHeartbeat(ctx context.Context, interval uint) {
-	ticker := time.NewTicker(time.Duration(interval))
+func (agent *Agent) StartHeartbeat(ctx context.Context, interval time.Duration) {
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	for {

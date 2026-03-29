@@ -10,6 +10,7 @@ import (
 	"pulse/internal/config"
 	"pulse/internal/handler"
 	"pulse/internal/store"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -74,7 +75,8 @@ func (app *App) logConfig() {
 }
 
 func (app *App) serveAgent(ctx context.Context) {
-	go app.agent.StartHeartbeat(ctx, app.config.Agent.HeartbeatIntervalSecs)
+	slog.Info("interval: ", "interval", app.config.Agent.HeartbeatIntervalSecs)
+	go app.agent.StartHeartbeat(ctx, time.Duration(app.config.Agent.HeartbeatIntervalSecs)*time.Second)
 }
 
 func (app *App) Configure(ctx context.Context) {
@@ -93,11 +95,16 @@ func (app *App) Serve(ctx context.Context) {
 		app.serveAgent(ctx)
 	}
 
-	// Listen on the port
-	port := app.config.Backend.Port
-	host := app.config.Backend.Host
-	slog.Info("Server starting", "port", app.config.Backend.Port)
-	if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), app.r); err != nil {
-		slog.Error(err.Error())
-	}
+	go func() {
+		// Listen on the port
+		port := app.config.Backend.Port
+		host := app.config.Backend.Host
+		slog.Info("Server starting", "port", app.config.Backend.Port)
+		if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), app.r); err != nil {
+			slog.Error(err.Error())
+		}
+	}()
+
+	<-ctx.Done()
+	slog.Info("Shutting down...")
 }
