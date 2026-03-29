@@ -1,0 +1,26 @@
+# Example TOML file for Pulse configuration
+# Serves as a demonstration on setup
+# Due to lack of strength to document this tool for the moment,
+# Presentation of features will be provided by the backend implementation itself
+
+[project]
+key = "pulse-back"
+name = "Pulse Backend"
+
+[agent]
+host = "127.0.0.1"
+port = 9090
+binary = "../agent/target/debug/pulse-agent" # for now debug
+auto_start = true
+buffer_size = 4096 # bytes
+flush_interval_secs = 10
+flush_threshold = 0.8
+heartbeat_interval_secs = 30
+
+[ingest]
+endpoint = "http://localhost:8080/ingest"
+timeout_secs = 5
+retry_attempts = 3
+
+[backend]
+port = 8080

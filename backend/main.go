@@ -18,7 +18,7 @@ import (
 
 func main() {
 	// Parsing the config
-	configPath := flag.String("config", "../pulse.toml", "path to config file")
+	configPath := flag.String("config", "../pulse/pulse.toml", "path to config file")
 	flag.Parse()
 	config, err := config.ParseConfig(*configPath)
 	if err != nil {

@@ -16,30 +16,30 @@ Pulse provides centralized monitoring for your applications:
 - **Backend**: Go + DuckDB (embedded analytics database)
 - **Dashboard**: React + TypeScript + Vite + TailwindCSS
 - **Agent**: Rust + Tokio (async runtime)
-- **IPC Protocol**: TCP + Protobuf
+- **IPC Protocol**: gRPC + Protobuf
 
 ## Architecture
 
 ```
-[Backend App] --TCP+Protobuf--> [Agent] --HTTP batches--> [/ingest API]
-      |                            ↑
-      |                       ring buffer
-      +--spawns on startup--------+
-      +--heartbeat----------------+
+[Backend App] --gRPC--> [Agent] --HTTP batches--> [/ingest API]
+      |                     ↑
+      |                ring buffer
+      +--spawns on startup--+
+      +--heartbeat----------+
 
-Backend Multi-writer: stdout + file + agent socket
+Backend Multi-writer: stdout + file + agent gRPC writer
 ```
 
 ### How It Works
 
 1. **Backend auto-starts agent** on startup using configured binary path
-2. **Backend connects** to agent via TCP socket (platform-independent)
+2. **Backend connects** to agent via gRPC (local or remote, same code)
 3. **Logs flow** through `slog` multi-writer to stdout, file, and agent simultaneously
 4. **Agent buffers** messages in a ring buffer
 5. **Agent flushes** to `/ingest` endpoint when:
    - Buffer reaches threshold (80% full)
    - Timer expires (every 10 seconds)
-6. **Heartbeat** keeps connection alive and tracks backend health
+6. **Heartbeat** tracks backend health via unary RPC
 
 **If agent is down**: Backend logs "agent detached" and continues with stdout + file only.
 
@@ -72,10 +72,20 @@ interval_secs = 30
 
 ## Protobuf Schema
 
-Messages sent over TCP use Protobuf for efficiency:
+Defined in `proto/pulse.proto`, compiled to Go (`gen/pulse/`) and Rust (`tonic-build` via `build.rs`):
 
 ```protobuf
 syntax = "proto3";
+
+package pulse;
+
+option go_package = "./gen/pulse";
+
+service Pulse {
+  rpc IngestLogs    (stream LogEntry)      returns (Ack);
+  rpc IngestMetrics (stream Metric)        returns (Ack);
+  rpc Heartbeat     (HeartbeatRequest)     returns (HeartbeatResponse);
+}
 
 message LogEntry {
   int64 timestamp = 1;
@@ -97,42 +107,43 @@ message Metric {
   map<string, string> tags = 7;
 }
 
-message Heartbeat {
+message HeartbeatRequest {
   int64 timestamp = 1;
 }
 
-message Message {
-  oneof payload {
-    LogEntry log = 1;
-    Metric metric = 2;
-    Heartbeat heartbeat = 3;
-  }
+message HeartbeatResponse {
+  int64 timestamp = 1;
+  bool ok = 2;
+}
+
+message Ack {
+  bool success = 1;
 }
 ```
-
-**Message Framing**: Length-prefixed (4 bytes u32 + protobuf payload)
 
 ## Integration
 
 ### Backend (Go)
 - Parse `pulse.toml` configuration
 - Spawn agent process if `auto_start = true`
-- Connect to TCP socket at configured host:port
-- Custom `slog.Handler` sends to agent via Protobuf
+- Connect via gRPC client to `host:port` (with retry loop on startup)
+- Custom `slog.Handler` streams log entries via `IngestLogs`
 - Multi-writer setup: `io.MultiWriter(stdout, file, agentWriter)`
-- Heartbeat goroutine sends periodic pings
+- Heartbeat goroutine calls `Heartbeat` RPC periodically
 - Reconnection logic logs "agent detached/reconnected"
+- Code generation: `protoc` + `protoc-gen-go` + `protoc-gen-go-grpc`
 
 ### Agent (Rust)
 - Parse same `pulse.toml` configuration
-- TCP server listens on configured port
-- Decode incoming Protobuf messages (using `prost` crate)
-- Store in ring buffer (fixed capacity)
+- gRPC server (`tonic`) listens on configured port
+- Implement `Pulse` service trait: `ingest_logs`, `ingest_metrics`, `heartbeat`
+- Store incoming entries in ring buffer (fixed capacity)
 - Flush conditions:
   - Timer tick (every `flush_interval_secs`)
   - Buffer threshold reached (`flush_threshold * buffer_size`)
 - Convert Protobuf → JSON and batch POST to `/ingest`
 - Handle buffer overflow by dropping oldest messages
+- Code generation: `tonic-build` in `build.rs` (runs automatically on `cargo build`)
 
 ### Ring Buffer Behavior
 - **Circular queue** with fixed capacity
@@ -160,28 +171,31 @@ cargo run
 ## Implementation Checklist
 
 ### Backend
-- [ ] Config parser for `pulse.toml`
-- [ ] Agent process spawner
-- [ ] TCP client connection
-- [ ] Protobuf encoder
+- [x] Config parser for `pulse.toml`
+- [x] Agent process spawner
+- [ ] gRPC client connection (with startup retry)
 - [ ] Custom `slog.Handler` for agent
 - [ ] Multi-writer integration
 - [ ] Heartbeat sender
 - [ ] Reconnection logic
 
 ### Agent
-- [ ] Config parser
-- [ ] TCP server
-- [ ] Protobuf decoder
+- [x] Config parser
+- [ ] gRPC server (`tonic`)
 - [ ] Ring buffer
 - [ ] Flush timer + threshold logic
 - [ ] HTTP client for batch ingestion
 - [ ] Graceful shutdown with buffer flush
 
+### Proto
+- [ ] `proto/pulse.proto` definition
+- [ ] Go codegen setup (`protoc` + plugins)
+- [ ] Rust codegen setup (`build.rs` + `tonic-build`)
+
 ## Roadmap
 
 **Phase 1** (Current):
-- TCP+Protobuf communication
+- gRPC communication (local or remote agent)
 - Ring buffer with smart flushing
 - Backend self-instrumentation
 - Agent auto-start

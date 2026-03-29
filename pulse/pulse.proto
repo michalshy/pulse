@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package pulse;
+
+option go_package = "./gen/pulse";
+
+service Pulse {
+  rpc IngestLogs    (stream LogEntry)      returns (Ack);
+  rpc IngestMetrics (stream Metric)        returns (Ack);
+  rpc Heartbeat     (HeartbeatRequest)     returns (HeartbeatResponse);
+}
+
+message LogEntry {
+  int64 timestamp = 1;
+  string level = 2;
+  string message = 3;
+  optional string agent_id = 4;
+  optional string host = 5;
+  optional string source_file = 6;
+  map<string, string> attrs = 7;
+}
+
+message Metric {
+  int64 timestamp = 1;
+  string name = 2;
+  double value = 3;
+  optional string metric_type = 4;
+  optional string agent_id = 5;
+  optional string host = 6;
+  map<string, string> tags = 7;
+}
+
+message HeartbeatRequest {
+  int64 timestamp = 1;
+}
+
+message HeartbeatResponse {
+  int64 timestamp = 1;
+  bool ok = 2;
+}
+
+message Ack {
+  bool success = 1;
+}
